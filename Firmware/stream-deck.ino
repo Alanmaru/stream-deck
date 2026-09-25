@@ -1,9 +1,12 @@
 #include <HID-Project.h>
 
-const int bt1 = 4;
-const int bt2 = 2;
+const int bt1 = 2;
+const int bt2 = 4;
 const int bt3 = 6;
-const int bt4 = 8;
+const int bt4 = 8; //Those are the 4 buttons
+
+const int potenciometro = A0; //Here we declare the potentiometer
+int valorAnterior = 0; //a variable that will be useful for simple filtering in the future
 
 int estadoAnteriorbt1 = HIGH;
 int estadoAnteriorbt2 = HIGH;
@@ -17,6 +20,8 @@ void setup() {
   pinMode(bt3, INPUT_PULLUP);
   pinMode(bt4, INPUT_PULLUP);
 
+  valorAnterior = analogRead(potenciometro);
+
   Keyboard.begin();
   Consumer.begin();
 }
@@ -29,23 +34,35 @@ void loop() {
   int estadoActualbt4 = digitalRead(bt4);
 
 if (estadoAnteriorbt1 == HIGH && estadoActualbt1 == LOW) {
-  delay(65);
-  jump();
+  delay(65);  
+  nextTrack();
 }
 
 if (estadoAnteriorbt2 == HIGH && estadoActualbt2 == LOW) {
   delay(65);
-  prevM();
+  switchWindow();
 }
 
 if (estadoAnteriorbt3 == HIGH && estadoActualbt3 == LOW) {
   delay(65);
-  pauseM();
+  playPause();
 }
 
 if (estadoAnteriorbt4 == HIGH && estadoActualbt4 == LOW) {
   delay(65);
-  skipM();
+  previousTrack();
+}
+
+int valorActual = analogRead(potenciometro);
+
+if (valorActual > valorAnterior + 10) {
+    Consumer.write(MEDIA_VOLUME_UP);
+    valorAnterior = valorActual;
+}
+
+if (valorActual < valorAnterior - 10) {
+    Consumer.write(MEDIA_VOLUME_DOWN);
+    valorAnterior = valorActual;
 }
 
 estadoAnteriorbt1 = estadoActualbt1;
@@ -55,8 +72,7 @@ estadoAnteriorbt4 = estadoActualbt4;
 }
 
 
-void jump() { //cambio de ventana
-
+void switchWindow() { //Switch to the previous window
   delay(15);
 
   Keyboard.press(KEY_LEFT_ALT);
@@ -64,8 +80,7 @@ void jump() { //cambio de ventana
   Keyboard.releaseAll();
 }
 
-void cortar() {
-
+void cutText() {  //Cut the text, ctrl x
   delay(15);
 
   Keyboard.press(KEY_LEFT_CTRL);
@@ -73,8 +88,23 @@ void cortar() {
   Keyboard.releaseAll();
 }
 
-void reset() { //reinicia los graficos por si congela
+void copyText() {  //Copy the text, ctrl c
+  delay(15);
 
+  Keyboard.press(KEY_LEFT_CTRL);
+  Keyboard.press('c');
+  Keyboard.releaseAll();
+}
+
+void pasteText() {  //paste the text, ctrl v
+  delay(15);
+
+  Keyboard.press(KEY_LEFT_CTRL);
+  Keyboard.press('v');
+  Keyboard.releaseAll();
+}
+
+void resetGraphics() { //Restart the graphics drivers
   delay(50);
 
   Keyboard.press(KEY_LEFT_GUI);
@@ -85,16 +115,16 @@ void reset() { //reinicia los graficos por si congela
   delay(1000);
 }
 
-void pauseM() { //pausa la musica
+void playPause() { //Pause or start playing the song
   delay(15);
   Consumer.write(MEDIA_PLAY_PAUSE);
 }
 
-void skipM() { //pasa a la siguente cancion
+void nextTrack() { //Skip to the next song.
   delay(15);
   Consumer.write(MEDIA_NEXT);
 }
-void prevM(){
+void previousTrack(){ //Go back to the previous song
   delay(15);
   Consumer.write(MEDIA_PREVIOUS);
 }
