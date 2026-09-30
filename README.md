@@ -16,6 +16,7 @@ The enclosure and future hardware improvements will be 3D printed and designed s
 - Media controls
 - Window switching with `Alt + Tab`
 - Previous, play/pause and next track controls
+- Analog volume control
 - Mechanical button input
 - Custom 3D-printed enclosure planned
 - Expandable design for future buttons and controls
@@ -26,6 +27,8 @@ The enclosure and future hardware improvements will be 3D printed and designed s
 - 4 tactile buttons
 - Breadboard
 - Dupont jumper wires
+- Potentiometer
+- Brown mechanical switch (prototype test)
 - 3D-printed parts (planned)
 
 ## Software
@@ -43,13 +46,32 @@ The enclosure and future hardware improvements will be 3D printed and designed s
 | BT3 | Play / Pause |
 | BT4 | Next track |
 
+## Hardware Testing
+
+### Mechanical Switch Prototype
+
+A brown mechanical switch was connected to the Arduino Leonardo prototype using Dupont wires.
+
+The switch worked correctly and was able to trigger the assigned function.
+
+This test was performed to verify that mechanical switches could be used as the physical inputs for the final version of the Stream Deck.
+
+The final version will use mechanical switches and a custom 3D-printed enclosure.
+
 ## Project Status
 
 Currently working prototype.
 
+Completed:
+
+- USB HID keyboard controls
+- Media controls
+- Window switching
+- Analog volume control
+- Mechanical switch prototype test
+
 Future improvements may include:
 
-- Analog volume control
 - Additional buttons
 - Custom 3D-printed enclosure
 - Mechanical switches
