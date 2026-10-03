@@ -1,12 +1,22 @@
 #include <HID-Project.h>
 
 const int bt1 = 2;
-const int bt2 = 4;
-const int bt3 = 6;
-const int bt4 = 8; //Those are the 4 buttons
+const int bt2 = 3;
+const int bt3 = 4;
+const int bt4 = 5; //Those are the 4 buttons
 
-const int potenciometro = A0; //Here we declare the potentiometer
-int valorAnterior = 0; //a variable that will be useful for simple filtering in the future
+
+const int encoderA = 8; // Pins for encoder
+const int encoderB = 9;
+const int boton = 7;
+
+int estadoAnteriorA;
+int estadoAnteriorB;
+
+int estadoBotonAnterior = HIGH;
+// Software debounce for the encoder button
+unsigned long ultimoTiempoBoton = 0;
+const unsigned long tiempoDebounce = 50;
 
 int estadoAnteriorbt1 = HIGH;
 int estadoAnteriorbt2 = HIGH;
@@ -20,7 +30,12 @@ void setup() {
   pinMode(bt3, INPUT_PULLUP);
   pinMode(bt4, INPUT_PULLUP);
 
-  valorAnterior = analogRead(potenciometro);
+  pinMode(encoderA, INPUT_PULLUP);
+  pinMode(encoderB, INPUT_PULLUP);
+  pinMode(boton, INPUT_PULLUP);
+
+  estadoAnteriorA = digitalRead(encoderA);
+  estadoAnteriorB = digitalRead(encoderB);
 
   Keyboard.begin();
   Consumer.begin();
@@ -32,6 +47,32 @@ void loop() {
   int estadoActualbt2 = digitalRead(bt2);
   int estadoActualbt3 = digitalRead(bt3);
   int estadoActualbt4 = digitalRead(bt4);
+
+  int estadoActualA = digitalRead(encoderA);
+
+if (estadoActualA != estadoAnteriorA && estadoActualA == LOW) {
+// If channel B is HIGH, it was turned to the right (Increase Volume)
+    if (digitalRead(encoderB) == HIGH) {
+      Consumer.write(MEDIA_VOLUME_UP);
+    } 
+// If channel B is LOW, it was turned to the left (Decrease Volume)
+    else {
+      Consumer.write(MEDIA_VOLUME_DOWN);
+    }
+  }
+  estadoAnteriorA = estadoActualA;
+
+int estadoActualBoton = digitalRead(boton);
+
+  if (estadoActualBoton != estadoBotonAnterior) {
+    if ((millis() - ultimoTiempoBoton) > tiempoDebounce) {
+      if (estadoActualBoton == LOW) { // click the button
+        Consumer.write(MEDIA_VOLUME_MUTE);
+      }
+      ultimoTiempoBoton = millis();
+    }
+    estadoBotonAnterior = estadoActualBoton;
+  }
 
 if (estadoAnteriorbt1 == HIGH && estadoActualbt1 == LOW) {
   delay(65);  
@@ -53,17 +94,6 @@ if (estadoAnteriorbt4 == HIGH && estadoActualbt4 == LOW) {
   previousTrack();
 }
 
-int valorActual = analogRead(potenciometro);
-
-if (valorActual > valorAnterior + 10) {
-    Consumer.write(MEDIA_VOLUME_UP);
-    valorAnterior = valorActual;
-}
-
-if (valorActual < valorAnterior - 10) {
-    Consumer.write(MEDIA_VOLUME_DOWN);
-    valorAnterior = valorActual;
-}
 
 estadoAnteriorbt1 = estadoActualbt1;
 estadoAnteriorbt2 = estadoActualbt2;
